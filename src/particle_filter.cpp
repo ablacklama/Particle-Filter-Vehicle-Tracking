@@ -18,6 +18,7 @@
 #include "particle_filter.h"
 
 using namespace std;
+default_random_engine gen;
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	// TODO: Set the number of particles. Initialize all particles to first position (based on estimates of 
@@ -27,7 +28,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	num_particles = 1000;
 	particles.resize(num_particles);
 
-	default_random_engine gen;
+	
 	normal_distribution<double> dist_x(x, std[0]);
 	normal_distribution<double> dist_y(y, std[1]);
 	normal_distribution<double> dist_theta(theta, std[2]);
@@ -79,6 +80,19 @@ void ParticleFilter::resample() {
 	// TODO: Resample particles with replacement with probability proportional to their weight. 
 	// NOTE: You may find std::discrete_distribution helpful here.
 	//   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
+	vector<Particle> new_particles;
+	new_particles.resize(num_particles);
+
+	discrete_distribution<int> d(weights.begin(), weights.end());
+	
+
+	for (int i = 0; i < num_particles; i++) {
+		int j = d(gen);
+		new_particles[i] = particles[j];
+	}
+
+	particles = new_particles;
+	return;
 
 }
 
