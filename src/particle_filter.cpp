@@ -57,7 +57,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 
 
 	for (vector<Particle>::iterator i = particles.begin(); i != particles.end(); i++) {
-		if (yaw_rate > 0.0001) {
+		if (fabs(yaw_rate) > 0.0001) {
 			theta = i->theta;
 			i->x = i->x + ((velocity / yaw_rate)*(sin(theta + (yaw_rate * delta_t)) - sin(theta)));
 			i->y = i->y + ((velocity / yaw_rate)*(cos(theta) - cos(theta + (yaw_rate * delta_t))));
@@ -85,7 +85,7 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 	//   implement this method and use it as a helper during the updateWeights phase.
 	double max_distance = 1.0e+99;
 
-	for (LandmarkObs obs : observations) {
+	for (LandmarkObs &obs : observations) {
 		double min_distance = max_distance;
 
 		for (auto& pred : predicted) {
@@ -135,12 +135,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				predicted.push_back(temp);
 			}
 		}
+		
 
 		//set associations for each observation
 		dataAssociation(predicted, observeCopy);
 
 		particle.weight = 1.0;
-		for (auto& obs : observations) {
+		for (auto& obs : observeCopy) {
 			LandmarkObs lm;
 			lm.id = obs.id;
 
@@ -156,14 +157,17 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			particle.weight *= (1 / (2 * M_PI* std_landmark[0] * std_landmark[1])) * exp(-(t1 + t2));
 		}
 		weight_sum += particle.weight;
+		
 
 	}
 	vector<double> all_weights;
-	for (Particle p : particles) {
+	for (Particle &p : particles) {
 		p.weight /= weight_sum;
 		all_weights.push_back(p.weight);
+		
 	}
 	weights = all_weights;
+	
 }
 
 void ParticleFilter::resample() {
